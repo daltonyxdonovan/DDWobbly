@@ -1,5 +1,8 @@
 # DDWobbly - Easy Mod Installer for Wobbly Life
 
+![DDWobbly image](resources/logo.png)
+
+
 ## Welcome to DDWobbly, the ultimate mod installer for the game Wobbly Life! Say goodbye to the hassle of manually installing mods and struggling with Python dependencies. DDWobbly simplifies the process, making modding your Wobbly Life experience a breeze.
 ### Features
 
