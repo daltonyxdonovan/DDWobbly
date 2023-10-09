@@ -11,9 +11,14 @@
 #include "Button.h"
 #include <iostream>
 #include <fstream>
+#define WIN32_LEAN_AND_MEAN
+#include <filesystem>
+#include <Windows.h>
+#include <ShlObj.h>
 
-using namespace std;
 #pragma endregion
+
+
 
 
 #pragma region ==VARIABLES==
@@ -33,7 +38,7 @@ int colorBTicker = 10;
 int ticker = 0;
 int offset = 0; 
 
-vector<sf::Color> colors;
+std::vector<sf::Color> colors;
 sf::Color color;
 sf::Color colorB;
 sf::Vector2i dragStartPosition;
@@ -71,12 +76,203 @@ sf::RectangleShape drawerBacker(sf::Vector2f(width,height));
 
 sf::Vector2i mousePos = sf::Mouse::getPosition();
 
+sf::Text dirText;
+
 #pragma endregion
+
+void InstallBepinex(const std::string& dir) {
+    std::cout << "Installing Bepinex to the directory specified at launch!" << std::endl;
+    std::string command = "Expand-Archive -Path .\\resources\\bepinex.zip -DestinationPath " + dir;
+    int result = system(command.c_str());
+
+    if (result == 0) {
+        std::cout << "Bepinex has been successfully installed to " << dir << "!" << std::endl;
+    } else {
+        std::cout << "Failed to install Bepinex. sadge. Please head to https://discord.gg/daMWV3TTea and let @Daltonyx know, with either a screenshot or a copy of this terminal's output to help others in the future not encounter this problem!" << std::endl;
+    }
+}
+
+bool CheckForBepinex(const std::string& dir) {
+    std::string fullPath = dir + "\\BepInEx"; // Construct the full path to the 'BepInEx' folder
+	LPCWSTR fullPathW;
+	fullPathW = (LPCWSTR)fullPath.c_str();
+
+    // Use the Windows API function GetFileAttributes to check if the folder exists
+    DWORD fileAttributes = GetFileAttributes(fullPathW);
+
+    if (fileAttributes != INVALID_FILE_ATTRIBUTES && (fileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+        // 'BepInEx' folder exists in the specified directory
+		std::cout << "User has BepInEx installed. Continuing!" << std::endl;
+        return true;
+    } else {
+        // 'BepInEx' folder does not exist in the specified directory
+		std::cout << "User does not have BepInEx installed. Attempting install..." << std::endl;
+        return false;
+    }
+}
+
+
+void InstallMod1(std::string dir, int& ticker)
+{
+	std::cout << "Installing Mod 1..." << std::endl;
+
+	if (CheckForBepinex(dir))
+	{
+		
+	}
+	else
+	{
+		InstallBepinex(dir);
+	}
+
+	if (std::filesystem::exists(dir + "\\BepInEx\\plugins\\WobblyLife_ConsoleCommands.dll"))
+	{
+		std::cout << "Console Commands already installed. Skipping..." << std::endl;
+		ticker = 120;
+		return;
+	}
+
+	//copy resources/WobblyLife_ConsoleCommands.dll to dir/BepInEx/plugins
+	std::ifstream src("resources/WobblyLife_ConsoleCommands.dll", std::ios::binary);
+	std::ofstream dst(dir + "\\BepInEx\\plugins\\WobblyLife_ConsoleCommands.dll", std::ios::binary);
+	dst << src.rdbuf();
+
+
+
+	ticker = 120; 
+}
+
+void InstallMod2(std::string dir, int& ticker)
+{
+	std::cout << "Installing Mod 2..." << std::endl;
+
+	if (CheckForBepinex(dir))
+	{
+		
+	}
+	else
+	{
+		InstallBepinex(dir);
+	}
+
+	if (std::filesystem::exists(dir + "\\BepInEx\\plugins\\WobblyLife_SizeModifier.dll"))
+	{
+		std::cout << "WobblyLife_SizeModifier already installed. Skipping..." << std::endl;
+		ticker = 120;
+		return;
+	}
+
+	//copy resources/WobblyLife_ConsoleCommands.dll to dir/BepInEx/plugins
+	std::ifstream src("resources/WobblyLife_SizeModifier.dll", std::ios::binary);
+	std::ofstream dst(dir + "\\BepInEx\\plugins\\WobblyLife_SizeModifier.dll", std::ios::binary);
+	dst << src.rdbuf();
+
+	ticker = 120; 
+}
+
+void InstallMod3(const std::string& dir, int& ticker) {
+    std::cout << "Installing Mod 3..." << std::endl;
+
+    // Construct the source and destination paths
+    std::string sourcePath = "resources\\Game.dll";
+    std::string destinationPath = dir + "\\Wobbly Life_Data\\Managed\\Game.dll";
+	LPCWSTR destinationPathW;
+	destinationPathW = (LPCWSTR)destinationPath.c_str();
+	LPCWSTR sourcePathW;
+	sourcePathW = (LPCWSTR)sourcePath.c_str();
+
+    // Use the Windows API function CopyFile to replace the file
+    if (CopyFile(sourcePathW, destinationPathW, FALSE)) {
+        std::cout << "Mod 3 has been successfully installed.\n\nWARNING: THIS REPLACES GAME.DLL IN YOUR GAME WITH ONE I'VE MODDED. IF YOU EXPERIENCE ANY WONKY BEHAVIOUR, PLEASE REPORT IT TO @DALTONYX IN THE DISCORD SERVER, AND IF IT IS UNDESIRABLE BEHAVIOUR GO VERIFY CACHE ON STEAM TO REPLACE IT WITH THE DEFAULT GAME.DLL FOR THE GAME. THIS WILL FIX IT" << std::endl;
+    } else {
+        std::cerr << "Failed to replace your game's DLL.\nIs Wobbly Life open while you're doing this? Naughty naughty." << std::endl;
+    }
+
+    // Set the ticker value to 120
+    ticker = 120;
+}
+
+void InstallMod4(std::string dir, int& ticker)
+{
+	std::cout << "Installing Mod 4..." << std::endl;
+
+	ticker = 120; 
+}
+
 
 int main()
 {
+	sf::Text install1;
+	sf::Text install2;
+	sf::Text install3;
+	sf::Text install4;
+
+	install1.setString("Finished!");
+	install2.setString("Finished!");
+	install3.setString("Finished!");
+	install4.setString("Finished!");
+
+	install1.setFont(font);
+	install2.setFont(font);
+	install3.setFont(font);
+	install4.setFont(font);
+
+	install1.setStyle(sf::Text::Bold);
+	install2.setStyle(sf::Text::Bold);
+	install3.setStyle(sf::Text::Bold);
+	install4.setStyle(sf::Text::Bold);
+
+	install1.setCharacterSize(12);
+	install2.setCharacterSize(12);
+	install3.setCharacterSize(12);
+	install4.setCharacterSize(12);
+
+	install1.setFillColor(sf::Color::Green);
+	install2.setFillColor(sf::Color::Green);
+	install3.setFillColor(sf::Color::Green);
+	install4.setFillColor(sf::Color::Green);
+
+	int install1Ticker = 0;
+	int install2Ticker = 0;
+	int install3Ticker = 0;
+	int install4Ticker = 0;
+
+	std::string folderPath = "You didn't select a folder, I won't work now.";
+
+	char buffer[MAX_PATH];
+	BROWSEINFOA info = { 0 };
+	info.hwndOwner = NULL;
+	info.pidlRoot = NULL;
+	info.pszDisplayName = buffer;
+	info.lpszTitle = "SELECT YOUR WOBBLY LIFE FOLDER\nDEFAULT IS NORMALLY: \nTHIS PC->C://PROGRAM FILES(x86)/STEAM/STEAMAPPS/COMMON/WOBBLY LIFE";
+	info.ulFlags = BIF_USENEWUI;
+
+	LPITEMIDLIST item = SHBrowseForFolderA(&info);
+
+	if (item != NULL) {
+		SHGetPathFromIDListA(item, buffer);
+		folderPath = buffer;
+		dirText.setFillColor(sf::Color::White);
+		CoTaskMemFree(item);
+		dirText.setCharacterSize(10);
+	}
+	else
+	{
+		dirText.setFillColor(sf::Color::Red);
+		dirText.setCharacterSize(15);
+	}
+
+	dirText.setString(folderPath);
+	dirText.setFont(font);
+	
+	dirText.setStyle(sf::Text::Bold);
+	dirText.setPosition(sf::Vector2f(width/2, height-70));
+	
+
 
 #pragma region ==VARIABLES INIT==
+
+
 
 	srand(time(NULL));
 
@@ -86,7 +282,7 @@ int main()
 
 	//add colors to vector
 	colors.push_back(sf::Color::White);
-	colors.push_back(sf::Color::Red);
+	/*colors.push_back(sf::Color::Red);
 	colors.push_back(sf::Color::Green);
 	colors.push_back(sf::Color::Blue);
 	colors.push_back(sf::Color::Yellow);
@@ -94,11 +290,13 @@ int main()
 	colors.push_back(sf::Color::Cyan);
 	colors.push_back(sf::Color(246,138,229));
 	colors.push_back(sf::Color(98,164,222));
-	colors.push_back(sf::Color(252,40,72));
+	colors.push_back(sf::Color(252,40,72));*/
 	
 
 	int colorChoice = rand()%colors.size();
 	color = colors[colorChoice];
+	//dirText.setFillColor(color);
+	dirText.setOrigin(dirText.getLocalBounds().width / 2, dirText.getLocalBounds().height / 2);
 	colorTicker = colorChoice;
 	colorB = sf::Color::Black;
 	sf::RenderWindow window(sf::VideoMode(width, height), "DDWobbly", sf::Style::None);
@@ -138,34 +336,38 @@ int main()
 	lockedSprite.setScale(sf::Vector2f(0.75f, 0.75f));
 
 	mod1.setFont(font);
-	mod1.setString("mod1");
-	mod1.setCharacterSize(30);
+	mod1.setString("Console Commands");
+	mod1.setCharacterSize(15);
 	mod1.setFillColor(sf::Color::White);
-	mod1.setPosition(50, 55);
+	mod1.setPosition(50, 65);
 
 	mod2.setFont(font);
-	mod2.setString("mod2");
-	mod2.setCharacterSize(30);
+	mod2.setString("Size Modifier");
+	mod2.setCharacterSize(15);
 	mod2.setFillColor(sf::Color::White);
-	mod2.setPosition(50, 155);
+	mod2.setPosition(50, 165);
 
 	mod3.setFont(font);
-	mod3.setString("mod3");
-	mod3.setCharacterSize(30);
+	mod3.setString("All Artifacts/Free Cars/\nFree Pets/Free Clothes");
+	mod3.setCharacterSize(15);
 	mod3.setFillColor(sf::Color::White);
 	mod3.setPosition(50, 255);
 
 	mod4.setFont(font);
-	mod4.setString("mod4");
-	mod4.setCharacterSize(30);
-	mod4.setFillColor(sf::Color::White);
-	mod4.setPosition(50, 355);
+	mod4.setString("    ==NOT MADE YET==\nSuggest mods on Discord!");
+	mod4.setCharacterSize(15);
+	mod4.setFillColor(sf::Color::Red);
+	mod4.setPosition(70, 355);
 
 	Button exit(sf::Vector2f(width - 20, 20), sf::Vector2f(25, 25), sf::Color(0,0,0), sf::Color::White, "x", 24, true, false, false);
-	Button mod1Button(sf::Vector2f(400,75),sf::Vector2f(100,30), sf::Color(0,0,0),sf::Color::Red,"OFFLINE",12,true, true, false);
-	Button mod2Button(sf::Vector2f(400, 175), sf::Vector2f(100, 30), sf::Color(0, 0, 0), sf::Color::Red, "OFFLINE", 12, true, true, false);
-	Button mod3Button(sf::Vector2f(400, 275), sf::Vector2f(100, 30), sf::Color(0, 0, 0), sf::Color::Red, "OFFLINE", 12, true, true, false);
-	Button mod4Button(sf::Vector2f(400, 375), sf::Vector2f(100, 30), sf::Color(0, 0, 0), sf::Color::Red, "OFFLINE", 12, true, true, false);
+	Button mod1Button(sf::Vector2f(400,75),sf::Vector2f(100,30), sf::Color(0,0,0),sf::Color::White,"INSTALL",12,true, true, false);
+	install1.setPosition(sf::Vector2f(width/2, 108));
+	Button mod2Button(sf::Vector2f(400, 175), sf::Vector2f(100, 30), sf::Color(0, 0, 0), sf::Color::White, "INSTALL", 12, true, true, false);
+	install2.setPosition(sf::Vector2f(width / 2, 208));
+	Button mod3Button(sf::Vector2f(400, 275), sf::Vector2f(100, 30), sf::Color(0, 0, 0), sf::Color::White, "INSTALL", 12, true, true, false);
+	install3.setPosition(sf::Vector2f(width / 2, 308));
+	Button mod4Button(sf::Vector2f(400, 375), sf::Vector2f(100, 30), sf::Color(0, 0, 0), sf::Color::White, "INSTALL", 12, true, true, false);
+	install4.setPosition(sf::Vector2f(width / 2, 408));
 	Button titleName(sf::Vector2f(220,height-23),sf::Vector2f(120,30),sf::Color::Black,sf::Color::White,"DDWOBBLY",24,true,false, true);
 
 	titlebar1.setFillColor(color);
@@ -236,6 +438,15 @@ int main()
 
 	while (window.isOpen())
 	{
+		if (install1Ticker >0)
+			install1Ticker--;
+		if (install2Ticker >0)
+			install2Ticker--;
+		if (install3Ticker >0)
+			install3Ticker--;
+		if (install4Ticker >0)
+			install4Ticker--;
+
 #pragma region ==VARS REFRESH==
 		borderTop.setFillColor(color);
 		borderBottom.setFillColor(color);
@@ -270,7 +481,8 @@ int main()
 		tipText.setOrigin(tipText.getGlobalBounds().width/2,tipText.getGlobalBounds().height/2);
 		tipText.setFillColor(color);
 		lockedText.setFillColor(color);
-
+		dirText.setOrigin(dirText.getLocalBounds().width / 2, dirText.getLocalBounds().height / 2);
+		//dirText.setFillColor(color);
 
 #pragma endregion
 
@@ -322,6 +534,31 @@ int main()
 			drawer = false;
 			locked = false;
 		}
+
+		if (mod1Button.clicked)
+		{
+			InstallMod1(folderPath, install1Ticker);
+		}
+
+		if (mod2Button.clicked)
+		{
+			InstallMod2(folderPath, install2Ticker);
+		}
+
+		if (mod3Button.clicked)
+		{
+			InstallMod3(folderPath, install3Ticker);
+		}
+
+		if (mod4Button.clicked)
+		{
+			InstallMod4(folderPath, install4Ticker);
+		}
+
+
+
+
+
 #pragma endregion
 
 		while (window.pollEvent(event))
@@ -340,7 +577,7 @@ int main()
 						{
 							
 						}
-						else if (mousePos.x < 100) //this is here to disallow clicking in that area
+						else if (locked && mousePos.x < 150) //this is here to disallow clicking in that area
 						{
 
 						}
@@ -417,6 +654,11 @@ int main()
 		window.draw(mod2);
 		window.draw(mod3);
 		window.draw(mod4);
+
+		install1.setOrigin(install1.getLocalBounds().width / 2, install1.getLocalBounds().height / 2);
+		install2.setOrigin(install2.getLocalBounds().width / 2, install2.getLocalBounds().height / 2);
+		install3.setOrigin(install3.getLocalBounds().width / 2, install3.getLocalBounds().height / 2);
+		install4.setOrigin(install4.getLocalBounds().width / 2, install4.getLocalBounds().height / 2);
 		
 		mod1Button.update(window);
 		mod1Button.draw(window);
@@ -427,14 +669,24 @@ int main()
 		mod4Button.update(window);
 		mod4Button.draw(window);
 
+		
+
 		exit.update(window);
 		exit.draw(window);
 		window.draw(lockedSprite);
 
-		window.draw(outputText1);
-		window.draw(outputText2);
-		window.draw(outputText3);
-		window.draw(outputText4);
+
+
+		window.draw(dirText);
+
+		if (install1Ticker > 0)
+			window.draw(install1);
+		if (install2Ticker > 0)
+			window.draw(install2);
+		if (install3Ticker >0)
+			window.draw(install3);
+		if (install4Ticker > 0)
+			window.draw(install4);
 
 		window.draw(drawerBacker);
 		titleName.draw(window);
@@ -456,5 +708,5 @@ int main()
 		window.setFramerateLimit(60);
 		window.display();
 	}
-    return 0;
+	return 0;
 }

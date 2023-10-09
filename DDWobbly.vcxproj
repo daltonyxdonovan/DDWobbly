@@ -150,6 +150,15 @@
   <ItemGroup>
     <Image Include="Icon.ico" />
     <Image Include="Icon.png" />
+    <Image Include="resources\icon.ico" />
+    <Image Include="resources\Icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Button.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DDWobbly.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -6,8 +6,6 @@
 #include <SFML/System.hpp>
 #include <string>
 
-using namespace std;
-
 class Button
 {
 public:
@@ -25,13 +23,13 @@ public:
 	bool hover = false;
 	bool active = false;
 	sf::RectangleShape shape;
-	string text_string;
+	std::string text_string;
 	int font_size;
 	bool interactable;
 	bool outlined;
 	bool italic;
 
-	Button(sf::Vector2f position, sf::Vector2f size, sf::Color color, sf::Color text_color, string text_string, int font_size, bool interactable, bool outlined, bool italic)
+	Button(sf::Vector2f position, sf::Vector2f size, sf::Color color, sf::Color text_color, std::string text_string, int font_size, bool interactable, bool outlined, bool italic)
 	{
 		this->position = position;
 		this->size = size;
